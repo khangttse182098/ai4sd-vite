@@ -47,7 +47,7 @@ const App = () => {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to generate text");
+        throw new Error("Failed to generate information");
       }
 
       const data = await res.json();
