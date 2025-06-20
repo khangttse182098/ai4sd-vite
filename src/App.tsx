@@ -90,7 +90,7 @@ const App = () => {
 
   return (
     <div className="app-container">
-      <header className="header">
+      <header className="headeR">
         <div className="logo">AI Assistant</div>
         <button
           className="theme-toggle"
