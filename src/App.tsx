@@ -29,24 +29,22 @@ const App = () => {
   };
 
   const handleFetchModel = async () => {
-    console.log("hello");
-
     if (prompt.trim()) {
-      console.log("AI Prompt:", prompt.trim());
-      prompt.concat(
-        ". Please don't include the thinking part, Return the project structure as a tree.Then provide the full content of each file using triple backticks with filename specified"
-      );
-      setPrompt("");
+      const promptContent =
+        prompt +
+        ". Please don't include the thinking part, Return the project structure as a tree.Then provide the full content of each file using triple backticks with filename specified";
+
+      console.log(promptContent);
 
       const payload = {
         model: "v0-1.5-md",
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: promptContent }],
       };
       const res = await fetch("https://api.v0.dev/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer v1:jQ81CuUA83TCudKamMz6EB8d:NB19VNG0y3GPQbt3rua2lv5a`,
         },
         body: JSON.stringify(payload),
       });
