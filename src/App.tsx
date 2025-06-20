@@ -6,6 +6,7 @@ const App = () => {
   const [prompt, setPrompt] = useState("");
   const [downloadUrl, setDownloadUrl] = useState<string>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const apiKey = import.meta.env.VITE_API_KEY;
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("ai-chat-theme") || "light";
@@ -45,7 +46,7 @@ const App = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer v1:jQ81CuUA83TCudKamMz6EB8d:NB19VNG0y3GPQbt3rua2lv5a`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify(payload),
       });
