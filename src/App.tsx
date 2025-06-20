@@ -4,6 +4,7 @@ import "./App.css";
 const App = () => {
   const [theme, setTheme] = useState("light");
   const [prompt, setPrompt] = useState("");
+  const [downloadUrl, setDownloadUrl] = useState<string>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -31,6 +32,9 @@ const App = () => {
 
     if (prompt.trim()) {
       console.log("AI Prompt:", prompt.trim());
+      prompt.concat(
+        ". Please don't include the thinking part, Return the project structure as a tree.Then provide the full content of each file using triple backticks with filename specified"
+      );
       setPrompt("");
 
       const payload = {
@@ -40,21 +44,40 @@ const App = () => {
       const res = await fetch("https://api.v0.dev/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Content-Type": "application/sjon",
+          "Content-Type": "application/json",
           Authorization: `Bearer v1:jQ81CuUA83TCudKamMz6EB8d:NB19VNG0y3GPQbt3rua2lv5a`,
         },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to generate text");
+        throw new Error("Failed to generate information");
       }
 
       const data = await res.json();
 
-      console.log(data);
-      return data;
+      const content = data.choices[0].message.content;
+
+      const fileRes = await fetch("http://localhost:3001/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+
+      const file = await fileRes.blob();
+      const url = URL.createObjectURL(file);
+      setDownloadUrl(url);
     }
+  };
+
+  const handleDownloadFile = async () => {
+    const a = document.createElement("a");
+    a.href = downloadUrl!;
+    a.download = "v0-project.zip";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(downloadUrl!);
   };
 
   useEffect(() => {
@@ -135,6 +158,11 @@ const App = () => {
           </div>
         </div>
       </main>
+      {downloadUrl && (
+        <button className="download-btn" onClick={() => handleDownloadFile()}>
+          ⬇️ Download File
+        </button>
+      )}
 
       <footer className="footer">AI4SD • Made with ❤️</footer>
     </div>
