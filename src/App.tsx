@@ -89,8 +89,8 @@ const App = () => {
   }, [prompt]);
 
   return (
-    <div className="app-container">
-      <header className="headeR">
+    <div className="app-containeR">
+      <header className="header">
         <div className="logo">AI Assistant</div>
         <button
           className="theme-toggle"
