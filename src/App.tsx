@@ -3,8 +3,10 @@ import "./App.css";
 
 const App = () => {
   const [theme, setTheme] = useState("light");
-  const [prompt, setPrompt] = useState("");
+  // const [prompt, setPrompt] = useState("");
   const [downloadUrl, setDownloadUrl] = useState<string>();
+  const [contextPrompt, setContextPrompt] = useState("");
+  const [requirementPrompt, setRequirementPrompt] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const apiKey = import.meta.env.VITE_API_KEY;
 
@@ -21,52 +23,57 @@ const App = () => {
     setTheme(newTheme);
   };
 
-  const handleKeyPress = (event: any) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      handleFetchModel();
-    }
+  const resetPrompt = () => {
+    setContextPrompt("");
+    setRequirementPrompt("");
   };
 
+  // const handleKeyPress = (event: any) => {
+  //   if (event.key === "Enter" && !event.shiftKey) {
+  //     event.preventDefault();
+  //     handleFetchModel();
+  //   }
+  // };
+
   const handleFetchModel = async () => {
-    if (prompt.trim()) {
-      const promptContent =
-        prompt +
-        ". Please don't include the thinking part, Return the project structure as a tree.Then provide the full content of each file using triple backticks with filename specified";
+    const promptContent =
+      `Context: ${contextPrompt}. Requirement: ${requirementPrompt}` +
+      `. Please don't include the thinking part. Return the project structure as a tree. Don't use ReactJS or NextJS. Only generate one HTML page and one CSS page. Then provide the full content of each file using triple backticks with filename specified`;
 
-      console.log(promptContent);
+    console.log(promptContent);
 
-      const payload = {
-        model: "v0-1.5-md",
-        messages: [{ role: "user", content: promptContent }],
-      };
-      const res = await fetch("https://api.v0.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer v1:jQ81CuUA83TCudKamMz6EB8d:NB19VNG0y3GPQbt3rua2lv5a`,
-        },
-        body: JSON.stringify(payload),
-      });
+    resetPrompt();
 
-      if (!res.ok) {
-        throw new Error("Failed to generate information");
-      }
+    const payload = {
+      model: "v0-1.5-lg",
+      messages: [{ role: "user", content: promptContent }],
+    };
+    const res = await fetch("https://api.v0.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-      const data = await res.json();
-
-      const content = data.choices[0].message.content;
-
-      const fileRes = await fetch("http://localhost:3001/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      });
-
-      const file = await fileRes.blob();
-      const url = URL.createObjectURL(file);
-      setDownloadUrl(url);
+    if (!res.ok) {
+      throw new Error("Failed to generate information");
     }
+
+    const data = await res.json();
+
+    const content = data.choices[0].message.content;
+
+    const fileRes = await fetch("http://localhost:3001/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+
+    const file = await fileRes.blob();
+    const url = URL.createObjectURL(file);
+    setDownloadUrl(url);
   };
 
   const handleDownloadFile = async () => {
@@ -129,8 +136,22 @@ const App = () => {
           </div>
 
           <div className="input-section">
+            <div className="extra-inputs">
+              <input
+                type="text"
+                placeholder="Context"
+                value={contextPrompt}
+                onChange={(e) => setContextPrompt(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Requirement"
+                value={requirementPrompt}
+                onChange={(e) => setRequirementPrompt(e.target.value)}
+              />
+            </div>
             <div className="input-wrapper">
-              <textarea
+              {/* <textarea
                 ref={textareaRef}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
@@ -138,12 +159,8 @@ const App = () => {
                 placeholder="Type your message here..."
                 className="prompt-textarea"
                 rows={3}
-              ></textarea>
-              <button
-                className="send-btn"
-                onClick={() => handleFetchModel()}
-                disabled={!prompt.trim()}
-              >
+              ></textarea> */}
+              <button className="send-btn" onClick={() => handleFetchModel()}>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
